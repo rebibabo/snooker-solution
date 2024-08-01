@@ -60,3 +60,30 @@ show函数根据斯诺克桌子参数构建了球桌，依次构建球桌、棕�
 
 n=2时，表示可以弹2库，镜像桌面和坐标如下图所示
 ![image](https://github.com/user-attachments/assets/90f6f7ae-5d76-4096-9838-380facb5081b)
+
+n=3时的坐标如下
+![image](https://github.com/user-attachments/assets/873d114e-28e0-4ba8-aaf1-ed29a873e179)
+
+可以找出来规律，首先一定包含(0,n), (n,0), (0,-n), (-n,0)的情况，然后依次可以和1, 2, 3...组合，直到n//2为止
+
+例如3可以等于1+2，则由1和2可以构建8个镜像坐标：
+
+(1,2), (1,-2), (-1,2), (-1,-2)
+
+(2,1), (2,-1), (-2,1), (-2,-1)
+
+当两个数相等时，则只能构建4个镜像坐标：
+
+(2,2), (2,-2), (-2,2), (-2,-2)
+
+这个symmetry函数输入n，返回所有镜像坐标列表，可以通过Table.show_symmetry显示镜像桌面
+
+### 找到目标球的镜像坐标
+如下图所示，镜像桌面(0,1)中的镜像目标球的y坐标可以通过镜像桌面的长度w'(=w-2*ball) + top + ball，x坐标不变
+
+桌面(1,0)的目标球的x坐标的等于l'(=l-w*ball) + right + ball，y坐标不变
+
+![微信图片_20240801150914](https://github.com/user-attachments/assets/8a5cdce2-0d1b-4edc-84f5-3e4add87e8bf)
+
+当镜像坐标为2的倍数时，两次镜像效果抵消，如下图所示，镜像桌面(2,0)的镜像目标球的坐标为2*l' + left + ball
+![微信图片_20240801152133](https://github.com/user-attachments/assets/8b9e085a-c8c2-4da9-b090-21825b91898b)
