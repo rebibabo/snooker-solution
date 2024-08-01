@@ -4,6 +4,8 @@ from shape import *
 from solution import *
 import math
 
+new_ax = lambda: plt.subplots(figsize=(16, 8))[1]
+
 class Ball:
     x: float    # 球的x坐标
     y: float    # 球的y坐标
@@ -26,7 +28,7 @@ class Table:
     def __init__(self, balls: Union[List[Ball], None] = None) -> None:
         if balls is None:
             self.balls['cue'] = Ball(self.line_x - 3*self.ball, self.width/2, 'white')
-            self.balls['black'] = Ball(self.length - 324, self.width/2, 'black')
+            self.balls['black'] = Ball(self.length - 324, self.width/2+400, 'black')
             self.balls['blue'] = Ball(self.length/2, self.width/2, 'blue')
             self.balls['pink'] = Ball(self.length/4*3, self.width/2, 'pink')
             self.balls['yellow'] = Ball(self.line_x, self.width/2 - self.Circle_r, 'yellow')
@@ -49,7 +51,6 @@ class Table:
         # 因为球有体积，实际碰库坐标应该减去球半径，桌子长度减去2倍的球半径
         index_x = (x - self.ball - 10e-6) // (self.length - 2*self.ball)    
         if index_x % 2: # 对称
-            # (l-2b) - {x - [b + k(1-2b)]} + 3b
             x = (index_x + 1) * (self.length - 2*self.ball) - x + 2*self.ball
         else:
             x -= index_x * (self.length - 2*self.ball)
@@ -82,9 +83,8 @@ class Table:
                         return False
         return True
 
-    def show(self, solution: List[Tuple[float, float]] = None) -> None:
+    def show(self, ax: plt.axes, solution: List[Tuple[float, float]] = None) -> None:
         ''' 显示球桌 '''
-        ax: plt.axes = plt.subplots(figsize=(16, 8))[1]
         margin = 2.7
         Rectangle(ax, -margin*self.hole, -margin*self.hole, self.length+2*margin*self.hole, self.width+2*margin*self.hole, '#00AA00') # 绿色桌布
 
@@ -155,9 +155,6 @@ class Table:
         return_solutions = []
         for idx_x, idx_y in sym_indexs:
             solutions: List[Tuple[float, float]] = [(cue.x, cue.y)]     # solutions存放母球的碰库坐标，包括母球起始坐标和目标球坐标
-            # Rectangle(ax, self.ball + idx_x * (self.length - 2*self.ball),   # 显示镜像桌面
-            #     self.ball + idx_y * (self.width - 2*self.ball), 
-            #     self.length - 2*self.ball, self.width - 2*self.ball, '#00AA00')
             sym_x = idx_x * (self.length - 2*self.ball) + (right if idx_x % 2 else left) + self.ball    # 计算目标球的镜像x坐标
             sym_y = idx_y * (self.width - 2*self.ball) + (top if idx_y % 2 else bottom) + self.ball
             # Circle(ax, sym_x, sym_y, self.ball, target.color, shade=True)    # 显示目标球的镜像
@@ -189,14 +186,32 @@ class Table:
                 return_solutions.append(solutions)
         return return_solutions
 
+    def show_symmetric(self, 
+        ax: plt.axes,   
+        cursion: int,   # 吃库次数
+        target: str = None  # 目标球的名字
+    ) -> None:
+        sym_indexs = symmetry(cursion)
+        if target:
+            target = self.balls[target]
+            left = target.x - self.ball                     # 目标球到左侧库边的距离
+            right = self.length - target.x - self.ball      # 目标球到右侧库边的距离
+            top = self.width - target.y - self.ball         # 目标球到顶部库边的距离
+            bottom = target.y - self.ball                   # 目标球到底部库边的距离
+        for idx_x, idx_y in sym_indexs:
+            Rectangle(ax, self.ball + idx_x * (self.length - 2*self.ball),   # 显示镜像桌面
+                self.ball + idx_y * (self.width - 2*self.ball), 
+                self.length - 2*self.ball, self.width - 2*self.ball, '#00AA00')
+            ax.text((idx_x + 0.42) * self.length, (idx_y + 0.42) * self.width, f"({idx_x}, {idx_y})", color='white')
+            if target:
+                sym_x = idx_x * (self.length - 2*self.ball) + (right if idx_x % 2 else left) + self.ball    # 计算目标球的镜像x坐标
+                sym_y = idx_y * (self.width - 2*self.ball) + (top if idx_y % 2 else bottom) + self.ball
+                Circle(ax, sym_x, sym_y, self.ball, target.color, shade=True)    # 显示目标球的镜像
+        self.show(ax)
+
 table = Table()
-max_num, num = 1, 0
+table.show_symmetric(new_ax(), 2, 'black')
 for cursion in range(8):
-    solutions = table.solution("brown", cursion)
+    solutions = table.solution("black", cursion)
     for solution in solutions:
-        table.show(solution)
-    #     num += 1
-    #     if num >= max_num:
-    #         break
-    # if num >= max_num:
-    #     break
+        table.show(new_ax(), solution)
