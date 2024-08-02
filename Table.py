@@ -152,12 +152,11 @@ class Table:
         right = self.length - target.x - self.ball      # 目标球到右侧库边的距离
         top = self.width - target.y - self.ball         # 目标球到顶部库边的距离
         bottom = target.y - self.ball                   # 目标球到底部库边的距离
-        return_solutions = []
+        return_solutions: List[List[Tuple[float, float]]] = []
         for idx_x, idx_y in sym_indexs:
             solutions: List[Tuple[float, float]] = [(cue.x, cue.y)]     # solutions存放母球的碰库坐标，包括母球起始坐标和目标球坐标
             sym_x = idx_x * (self.length - 2*self.ball) + (right if idx_x % 2 else left) + self.ball    # 计算目标球的镜像x坐标
             sym_y = idx_y * (self.width - 2*self.ball) + (top if idx_y % 2 else bottom) + self.ball
-            # Circle(ax, sym_x, sym_y, self.ball, target.color, shade=True)    # 显示目标球的镜像
             fx, fy = line(cue.x, cue.y, sym_x, sym_y)   # 计算母球到镜像目标球的直线方程
             crossCoord: List[Tuple[float, float]] = []   # 存放碰撞点坐标
             if fx:  # 如果斜率不为无穷大
